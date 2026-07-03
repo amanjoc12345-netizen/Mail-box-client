@@ -1,0 +1,228 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --primary-color: #0d6efd;
+  --bg-color: #ffffff;
+  --text-color: #212529;
+  --font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-family);
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Decorative blue organic shape matching design reference exactly in the top right */
+.organic-shape-container {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 450px;
+  height: 400px;
+  background: linear-gradient(135deg, #0d6efd 0%, #0243aa 100%);
+  clip-path: ellipse(75% 55% at 95% 10%);
+  z-index: -1;
+  opacity: 0.95;
+  box-shadow: 0 10px 30px rgba(13, 110, 253, 0.3);
+  animation: morph-shape 12s ease-in-out infinite alternate;
+}
+
+@keyframes morph-shape {
+  0% {
+    clip-path: ellipse(75% 55% at 95% 10%);
+  }
+  50% {
+    clip-path: ellipse(80% 60% at 90% 15%);
+  }
+  100% {
+    clip-path: ellipse(72% 52% at 97% 8%);
+  }
+}
+
+/* Background blob decoration for soft gradient glow */
+.bg-organic-blob {
+  position: absolute;
+  top: -100px;
+  right: -100px;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(13, 110, 253, 0.15) 0%, rgba(13, 110, 253, 0.03) 70%, rgba(255, 255, 255, 0) 100%);
+  border-radius: 50%;
+  z-index: -2;
+  animation: blob-float 15s ease-in-out infinite alternate;
+}
+
+@keyframes blob-float {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    transform: translate(-40px, 40px) scale(1.1);
+  }
+}
+
+/* Custom styles for cards */
+.signup-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
+  background-color: #ffffff;
+  padding: 2.2rem 2.5rem;
+  transition: all 0.3s ease;
+  max-width: 420px;
+  width: 100%;
+}
+
+.signup-card:hover {
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.07);
+}
+
+.redirect-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background-color: #f7fafc; /* Pale gray-green tinted bg matching design exactly */
+  padding: 0.9rem;
+  text-align: center;
+  max-width: 420px;
+  width: 100%;
+  margin-top: 1.2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.01);
+  font-size: 0.95rem;
+}
+
+.redirect-link {
+  color: #0d6efd;
+  text-decoration: none;
+  font-weight: 600;
+  margin-left: 0.3rem;
+  transition: color 0.2s ease;
+}
+
+.redirect-link:hover {
+  color: #0243aa;
+  text-decoration: underline;
+}
+
+/* Custom form inputs */
+.form-control-custom {
+  border-radius: 8px;
+  padding: 0.7rem 0.9rem;
+  border: 1.5px solid #cbd5e1;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  font-weight: 400;
+}
+
+.form-control-custom:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.12);
+  outline: none;
+}
+
+/* Custom button style */
+.btn-primary-custom {
+  background-color: #0d6efd;
+  border: none;
+  border-radius: 8px;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  color: #ffffff;
+  transition: all 0.2s ease;
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.btn-primary-custom:hover:not(:disabled) {
+  background-color: #0b5ed7;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(13, 110, 253, 0.2);
+}
+
+.btn-primary-custom:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn-primary-custom:disabled {
+  background-color: #93c5fd;
+  color: #ffffff;
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+/* Header Navbar style */
+.header-navbar {
+  background: transparent !important;
+  border: none;
+}
+
+.navbar-brand-custom {
+  font-weight: 700;
+  font-size: 1.35rem;
+  color: #1e293b !important;
+  transition: transform 0.2s ease;
+}
+
+.navbar-brand-custom:hover {
+  transform: scale(1.02);
+}
+
+.nav-link-custom {
+  color: #475569 !important;
+  font-weight: 500;
+  margin-left: 1.8rem;
+  font-size: 0.95rem;
+  transition: color 0.2s ease;
+}
+
+.nav-link-custom:hover {
+  color: #0d6efd !important;
+}
+
+.form-label-custom {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #475569;
+  margin-bottom: 0.35rem;
+}
+
+/* Password input container with toggler */
+.password-toggle-wrapper {
+  position: relative;
+}
+
+.password-toggle-icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #64748b;
+  z-index: 10;
+  transition: color 0.2s ease;
+}
+
+.password-toggle-icon:hover {
+  color: #1e293b;
+}
+
+/* Micro-animations and fades */
+.fade-in {
+  animation: fadeIn 0.4s ease-in-out forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
