@@ -302,4 +302,63 @@ body {
   cursor: text;
 }
 
+/* Mail Client Custom Styles */
+.mail-list-item {
+  border-bottom: 1px solid #f1f5f9;
+  cursor: pointer;
+  background-color: #ffffff;
+}
+
+.mail-list-item:hover {
+  background-color: #f8fafc;
+}
+
+.mail-item-unread {
+  background-color: #f8fafc;
+}
+
+.mail-item-active {
+  background-color: #f0f7ff !important;
+}
+
+.mail-list-container {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+.mail-list-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.mail-list-container::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: 4px;
+}
+
+.mail-list-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.spin-animation {
+  animation: spin-kf 1s linear infinite;
+}
+
+@keyframes spin-kf {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.mail-body-content p {
+  margin-bottom: 1rem;
+}
+
+.hover-shadow:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+}
+
+
 

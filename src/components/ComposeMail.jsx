@@ -54,13 +54,14 @@ const ComposeMail = () => {
     try {
       const sanitizedReceiver = sanitizeEmail(to.trim());
       const sanitizedSender = sanitizeEmail(senderEmail);
+      const token = localStorage.getItem('token') || '';
 
       // Construct Realtime Database REST API endpoints using user's Project ID
       const projectId = "mail-box-client-5c701";
       const databaseUrl = `https://${projectId}-default-rtdb.firebaseio.com`;
 
       // 1. Send / Post to receiver's inbox
-      const inboxUrl = `${databaseUrl}/emails/${sanitizedReceiver}/inbox.json`;
+      const inboxUrl = `${databaseUrl}/emails/${sanitizedReceiver}/inbox.json?auth=${token}`;
       const inboxRes = await fetch(inboxUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -72,7 +73,7 @@ const ComposeMail = () => {
       }
 
       // 2. Send / Post to sender's sentbox
-      const sentUrl = `${databaseUrl}/emails/${sanitizedSender}/sent.json`;
+      const sentUrl = `${databaseUrl}/emails/${sanitizedSender}/sent.json?auth=${token}`;
       const sentRes = await fetch(sentUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
