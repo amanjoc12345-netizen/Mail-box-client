@@ -226,3 +226,80 @@ body {
     transform: translateY(0);
   }
 }
+
+/* Dashboard Sidebar styling */
+.mailbox-sidebar {
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.5rem 1rem;
+  min-height: calc(100vh - 160px);
+}
+
+.sidebar-nav-btn {
+  width: 100%;
+  text-align: left;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #475569;
+  border: none;
+  background: transparent;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.sidebar-nav-btn:hover {
+  background-color: #f1f5f9;
+  color: #0d6efd;
+}
+
+.sidebar-nav-btn.active {
+  background-color: #e0f2fe;
+  color: #0369a1;
+}
+
+/* Rich Text Editor Customize styling */
+.wysiwyg-editor-wrapper {
+  border: 1.5px solid #cbd5e1;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #ffffff;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.wysiwyg-editor-wrapper:focus-within {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.12);
+}
+
+.wysiwyg-editor-toolbar {
+  border-bottom: 1.5px solid #e2e8f0 !important;
+  background-color: #f8fafc !important;
+  margin-bottom: 0 !important;
+  padding: 6px 12px !important;
+}
+
+.wysiwyg-editor-content {
+  min-height: 250px;
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 1rem;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.wysiwyg-editor-content .public-DraftEditor-content {
+  min-height: 220px;
+}
+
+.wysiwyg-editor-content:empty:before {
+  content: attr(placeholder);
+  color: #94a3b8;
+  cursor: text;
+}
+
+

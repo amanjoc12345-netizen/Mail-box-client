@@ -4,6 +4,10 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import './index.css'
 import App from './App.jsx'
 
+// TEMPORARY INJECTION FOR BROWSER AGENT UI TESTING
+localStorage.setItem('token', 'mock-verification-token');
+localStorage.setItem('email', 'testuser_12345@gmail.com');
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <App />
