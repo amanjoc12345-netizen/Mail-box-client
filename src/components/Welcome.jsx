@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Row, Col, Badge } from 'react-bootstrap';
 import { FiEdit2, FiInbox, FiSend } from 'react-icons/fi';
@@ -14,6 +14,14 @@ const Welcome = () => {
   const [inboxEmails, setInboxEmails] = useState([]);
   const [sentEmails, setSentEmails] = useState([]);
   
+  // Ref to hold the latest inboxEmails to prevent closure issues and optimize renders
+  const inboxEmailsRef = useRef([]);
+  
+  // Keep the ref synchronized with the state
+  useEffect(() => {
+    inboxEmailsRef.current = inboxEmails;
+  }, [inboxEmails]);
+
   // Loading and Error states
   const [inboxLoading, setInboxLoading] = useState(false);
   const [sentLoading, setSentLoading] = useState(false);
@@ -25,6 +33,26 @@ const Welcome = () => {
 
   const sanitizeEmail = (email) => {
     return email.replace(/\./g, '_');
+  };
+
+  // Helper to compare two lists of emails to prevent unnecessary state updates
+  const isSameEmailList = (listA, listB) => {
+    if (listA.length !== listB.length) return false;
+    for (let i = 0; i < listA.length; i++) {
+      const a = listA[i];
+      const b = listB[i];
+      if (
+        a.id !== b.id ||
+        a.isRead !== b.isRead ||
+        a.subject !== b.subject ||
+        a.body !== b.body ||
+        a.timestamp !== b.timestamp ||
+        a.sender !== b.sender
+      ) {
+        return false;
+      }
+    }
+    return true;
   };
 
   // Fetch received emails from Firebase
@@ -48,8 +76,10 @@ const Welcome = () => {
       
       const data = await response.json();
       if (!data) {
-        setInboxEmails([]);
-        setUnreadCount(0);
+        if (inboxEmailsRef.current.length > 0) {
+          setInboxEmails([]);
+          setUnreadCount(0);
+        }
         return;
       }
 
@@ -62,11 +92,14 @@ const Welcome = () => {
       // Sort by timestamp descending (newest first)
       mailsList.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
-      setInboxEmails(mailsList);
-
-      // Compute unread count
-      const count = mailsList.filter((m) => !m.isRead).length;
-      setUnreadCount(count);
+      // Compare fetched list against the current state ref
+      if (!isSameEmailList(mailsList, inboxEmailsRef.current)) {
+        setInboxEmails(mailsList);
+        
+        // Compute unread count
+        const count = mailsList.filter((m) => !m.isRead).length;
+        setUnreadCount(count);
+      }
     } catch (err) {
       console.error('Error fetching inbox:', err);
       setInboxError(err.message || 'An error occurred while loading inbox.');
@@ -129,10 +162,10 @@ const Welcome = () => {
     // Perform initial fetch
     fetchInboxEmails();
 
-    // Start 10-second polling for real-time inbox/unread count updates
+    // Start 2-second polling for real-time inbox/unread count updates
     const intervalId = setInterval(() => {
       fetchInboxEmails(true);
-    }, 10000);
+    }, 2000);
 
     return () => clearInterval(intervalId);
   }, [navigate]);
