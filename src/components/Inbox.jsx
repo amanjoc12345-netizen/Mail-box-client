@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
 import { Row, Col, Card, Form, InputGroup, Button, Badge, Spinner } from 'react-bootstrap';
 import { FiSearch, FiRotateCw, FiTrash2, FiInbox, FiEdit2, FiClock, FiUser } from 'react-icons/fi';
+import useHttp from '../hooks/use-http';
 
 const Inbox = ({ emails = [], loading = false, error = '', onRefresh, onCompose }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedMailId, setSelectedMailId] = useState(null);
-  const [deleting, setDeleting] = useState(false);
+  
+  // Custom HTTP hooks for delete and read status actions
+  const { isLoading: deleting, sendRequest: deleteRequest } = useHttp();
+  const { sendRequest: markReadRequest } = useHttp();
 
   // Sanitizes user email to match firebase key path rules
   const sanitizeEmail = (email) => {
@@ -50,10 +54,13 @@ const Inbox = ({ emails = [], loading = false, error = '', onRefresh, onCompose 
         const mailUrl = `https://${projectId}-default-rtdb.firebaseio.com/emails/${sanitizedUser}/inbox/${mail.id}.json?auth=${token}`;
 
         // Mark as read in the database
-        await fetch(mailUrl, {
+        await markReadRequest({
+          url: mailUrl,
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ isRead: true })
+          body: { isRead: true },
+          silent: true,
+          errorMessage: 'Failed to update read status.'
         });
 
         // Trigger parent state update
@@ -72,7 +79,6 @@ const Inbox = ({ emails = [], loading = false, error = '', onRefresh, onCompose 
       return;
     }
 
-    setDeleting(true);
     try {
       const userEmail = localStorage.getItem('email') || 'unknown@example.com';
       const token = localStorage.getItem('token') || '';
@@ -80,13 +86,11 @@ const Inbox = ({ emails = [], loading = false, error = '', onRefresh, onCompose 
       const projectId = "mail-box-client-5c701";
       const mailUrl = `https://${projectId}-default-rtdb.firebaseio.com/emails/${sanitizedUser}/inbox/${mailId}.json?auth=${token}`;
 
-      const response = await fetch(mailUrl, {
-        method: 'DELETE'
+      await deleteRequest({
+        url: mailUrl,
+        method: 'DELETE',
+        errorMessage: 'Failed to delete email from database.'
       });
-
-      if (!response.ok) {
-        throw new Error('Failed to delete email from database.');
-      }
 
       setSelectedMailId(null);
       
@@ -96,8 +100,6 @@ const Inbox = ({ emails = [], loading = false, error = '', onRefresh, onCompose 
     } catch (err) {
       console.error('Error deleting email:', err);
       alert(err.message || 'An error occurred during deletion.');
-    } finally {
-      setDeleting(false);
     }
   };
 

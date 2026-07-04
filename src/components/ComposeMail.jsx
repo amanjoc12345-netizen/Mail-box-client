@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
 import { Form, Button, Alert, Card, Spinner } from 'react-bootstrap';
 import RichTextEditor from './RichTextEditor';
+import useHttp from '../hooks/use-http';
 
 const ComposeMail = () => {
   const [to, setTo] = useState('');
   const [subject, setSubject] = useState('');
   const [body, setBody] = useState('');
 
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  // Custom HTTP hook for sending emails
+  const { isLoading: loading, error, sendRequest, setError } = useHttp();
   const [success, setSuccess] = useState('');
 
   // Sanitizes email addresses for Firebase key compatibility (replaces dots . with underscores _)
@@ -19,7 +20,7 @@ const ComposeMail = () => {
 
   const handleSend = async (e) => {
     e.preventDefault();
-    setError('');
+    setError(null);
     setSuccess('');
 
     // Pre-submission validation
@@ -53,8 +54,6 @@ const ComposeMail = () => {
       isRead: false
     };
 
-    setLoading(true);
-
     try {
       const sanitizedReceiver = sanitizeEmail(normalizedReceiverEmail);
       const sanitizedSender = sanitizeEmail(normalizedSenderEmail);
@@ -66,27 +65,23 @@ const ComposeMail = () => {
 
       // 1. Send / Post to receiver's inbox
       const inboxUrl = `${databaseUrl}/emails/${sanitizedReceiver}/inbox.json?auth=${token}`;
-      const inboxRes = await fetch(inboxUrl, {
+      await sendRequest({
+        url: inboxUrl,
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(mailData)
+        body: mailData,
+        errorMessage: 'Failed to deliver email to recipient inbox.'
       });
-
-      if (!inboxRes.ok) {
-        throw new Error('Failed to deliver email to recipient inbox.');
-      }
 
       // 2. Send / Post to sender's sentbox
       const sentUrl = `${databaseUrl}/emails/${sanitizedSender}/sent.json?auth=${token}`;
-      const sentRes = await fetch(sentUrl, {
+      await sendRequest({
+        url: sentUrl,
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(mailData)
+        body: mailData,
+        errorMessage: 'Failed to record email in your sentbox.'
       });
-
-      if (!sentRes.ok) {
-        throw new Error('Failed to record email in your sentbox.');
-      }
 
       setSuccess('Email sent successfully!');
 
@@ -97,9 +92,6 @@ const ComposeMail = () => {
 
     } catch (err) {
       console.error('Failed to send mail:', err);
-      setError(err.message || 'An error occurred while sending the email. Please try again.');
-    } finally {
-      setLoading(false);
     }
   };
 

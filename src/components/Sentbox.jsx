@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 import { Row, Col, Card, Form, InputGroup, Button, Spinner } from 'react-bootstrap';
 import { FiSearch, FiRotateCw, FiTrash2, FiSend, FiEdit2, FiClock, FiUser } from 'react-icons/fi';
+import useHttp from '../hooks/use-http';
 
 const Sentbox = ({ emails = [], loading = false, error = '', onRefresh, onCompose }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedMailId, setSelectedMailId] = useState(null);
-  const [deleting, setDeleting] = useState(false);
+  
+  // Custom HTTP hook for deleting emails
+  const { isLoading: deleting, sendRequest: deleteRequest } = useHttp();
 
   // Sanitizes user email to match firebase key path rules
   const sanitizeEmail = (email) => {
@@ -43,7 +46,6 @@ const Sentbox = ({ emails = [], loading = false, error = '', onRefresh, onCompos
       return;
     }
 
-    setDeleting(true);
     try {
       const userEmail = localStorage.getItem('email') || 'unknown@example.com';
       const token = localStorage.getItem('token') || '';
@@ -51,13 +53,11 @@ const Sentbox = ({ emails = [], loading = false, error = '', onRefresh, onCompos
       const projectId = "mail-box-client-5c701";
       const mailUrl = `https://${projectId}-default-rtdb.firebaseio.com/emails/${sanitizedUser}/sent/${mailId}.json?auth=${token}`;
 
-      const response = await fetch(mailUrl, {
-        method: 'DELETE'
+      await deleteRequest({
+        url: mailUrl,
+        method: 'DELETE',
+        errorMessage: 'Failed to delete email from database.'
       });
-
-      if (!response.ok) {
-        throw new Error('Failed to delete email from database.');
-      }
 
       setSelectedMailId(null);
       
@@ -67,8 +67,6 @@ const Sentbox = ({ emails = [], loading = false, error = '', onRefresh, onCompos
     } catch (err) {
       console.error('Error deleting sent email:', err);
       alert(err.message || 'An error occurred during deletion.');
-    } finally {
-      setDeleting(false);
     }
   };
 

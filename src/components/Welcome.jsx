@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Row, Col, Badge } from 'react-bootstrap';
 import { FiEdit2, FiInbox, FiSend } from 'react-icons/fi';
 import ComposeMail from './ComposeMail';
 import Inbox from './Inbox';
 import Sentbox from './Sentbox';
+import useHttp from '../hooks/use-http';
 
 const Welcome = () => {
   const navigate = useNavigate();
@@ -22,11 +23,9 @@ const Welcome = () => {
     inboxEmailsRef.current = inboxEmails;
   }, [inboxEmails]);
 
-  // Loading and Error states
-  const [inboxLoading, setInboxLoading] = useState(false);
-  const [sentLoading, setSentLoading] = useState(false);
-  const [inboxError, setInboxError] = useState('');
-  const [sentError, setSentError] = useState('');
+  // HTTP Custom Hooks for Inbox and Sentbox API calls
+  const { isLoading: inboxLoading, error: inboxError, sendRequest: sendInboxRequest } = useHttp();
+  const { isLoading: sentLoading, error: sentError, sendRequest: sendSentRequest } = useHttp();
   
   // Unread badge count state
   const [unreadCount, setUnreadCount] = useState(0);
@@ -56,25 +55,22 @@ const Welcome = () => {
   };
 
   // Fetch received emails from Firebase
-  const fetchInboxEmails = async (isSilent = false) => {
+  const fetchInboxEmails = useCallback(async (isSilent = false) => {
     const email = localStorage.getItem('email');
     const token = localStorage.getItem('token') || '';
     if (!email) return;
-
-    if (!isSilent) setInboxLoading(true);
-    setInboxError('');
 
     try {
       const sanitizedUser = sanitizeEmail(email);
       const projectId = "mail-box-client-5c701";
       const inboxUrl = `https://${projectId}-default-rtdb.firebaseio.com/emails/${sanitizedUser}/inbox.json?auth=${token}`;
 
-      const response = await fetch(inboxUrl);
-      if (!response.ok) {
-        throw new Error('Failed to fetch inbox emails.');
-      }
-      
-      const data = await response.json();
+      const data = await sendInboxRequest({
+        url: inboxUrl,
+        silent: isSilent,
+        errorMessage: 'Failed to fetch inbox emails.'
+      });
+
       if (!data) {
         if (inboxEmailsRef.current.length > 0) {
           setInboxEmails([]);
@@ -102,32 +98,25 @@ const Welcome = () => {
       }
     } catch (err) {
       console.error('Error fetching inbox:', err);
-      setInboxError(err.message || 'An error occurred while loading inbox.');
-    } finally {
-      if (!isSilent) setInboxLoading(false);
     }
-  };
+  }, [sendInboxRequest]);
 
   // Fetch sent emails from Firebase
-  const fetchSentEmails = async () => {
+  const fetchSentEmails = useCallback(async () => {
     const email = localStorage.getItem('email');
     const token = localStorage.getItem('token') || '';
     if (!email) return;
-
-    setSentLoading(true);
-    setSentError('');
 
     try {
       const sanitizedUser = sanitizeEmail(email);
       const projectId = "mail-box-client-5c701";
       const sentUrl = `https://${projectId}-default-rtdb.firebaseio.com/emails/${sanitizedUser}/sent.json?auth=${token}`;
 
-      const response = await fetch(sentUrl);
-      if (!response.ok) {
-        throw new Error('Failed to fetch sent emails.');
-      }
-      
-      const data = await response.json();
+      const data = await sendSentRequest({
+        url: sentUrl,
+        errorMessage: 'Failed to fetch sent emails.'
+      });
+
       if (!data) {
         setSentEmails([]);
         return;
@@ -145,11 +134,8 @@ const Welcome = () => {
       setSentEmails(mailsList);
     } catch (err) {
       console.error('Error fetching sentbox:', err);
-      setSentError(err.message || 'An error occurred while loading sent emails.');
-    } finally {
-      setSentLoading(false);
     }
-  };
+  }, [sendSentRequest]);
 
   // Redirect to login if token is missing, and establish polling for real-time inbox updates
   useEffect(() => {
@@ -168,14 +154,14 @@ const Welcome = () => {
     }, 2000);
 
     return () => clearInterval(intervalId);
-  }, [navigate]);
+  }, [navigate, fetchInboxEmails]);
 
   // Fetch sent emails whenever user switches to the Sentbox tab
   useEffect(() => {
     if (activeTab === 'sent') {
       fetchSentEmails();
     }
-  }, [activeTab]);
+  }, [activeTab, fetchSentEmails]);
 
   return (
     <Row className="gy-4">
