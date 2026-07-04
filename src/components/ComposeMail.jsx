@@ -12,8 +12,9 @@ const ComposeMail = () => {
   const [success, setSuccess] = useState('');
 
   // Sanitizes email addresses for Firebase key compatibility (replaces dots . with underscores _)
+  // Also normalizes casing + whitespace to ensure fetch + write hit the same Firebase node.
   const sanitizeEmail = (email) => {
-    return email.replace(/\./g, '_');
+    return email.trim().toLowerCase().replace(/\./g, '_');
   };
 
   const handleSend = async (e) => {
@@ -40,9 +41,12 @@ const ComposeMail = () => {
     // Retrieve sender email from local storage
     const senderEmail = localStorage.getItem('email') || 'unknown@example.com';
 
+    const normalizedSenderEmail = senderEmail.trim().toLowerCase();
+    const normalizedReceiverEmail = to.trim().toLowerCase();
+
     const mailData = {
-      sender: senderEmail,
-      receiver: to.trim(),
+      sender: normalizedSenderEmail,
+      receiver: normalizedReceiverEmail,
       subject: subject.trim() || '(No Subject)',
       body: body, // HTML string from rich text editor
       timestamp: new Date().toISOString(),
@@ -52,8 +56,8 @@ const ComposeMail = () => {
     setLoading(true);
 
     try {
-      const sanitizedReceiver = sanitizeEmail(to.trim());
-      const sanitizedSender = sanitizeEmail(senderEmail);
+      const sanitizedReceiver = sanitizeEmail(normalizedReceiverEmail);
+      const sanitizedSender = sanitizeEmail(normalizedSenderEmail);
       const token = localStorage.getItem('token') || '';
 
       // Construct Realtime Database REST API endpoints using user's Project ID
@@ -85,7 +89,7 @@ const ComposeMail = () => {
       }
 
       setSuccess('Email sent successfully!');
-      
+
       // Reset input fields
       setTo('');
       setSubject('');
@@ -106,7 +110,7 @@ const ComposeMail = () => {
           Compose Mail
         </h4>
       </Card.Header>
-      
+
       <Card.Body className="px-4 pb-4 pt-2">
         {error && (
           <Alert variant="danger" className="py-2 px-3 mb-3 border-0 rounded-3 text-center" style={{ fontSize: '0.9rem' }}>
